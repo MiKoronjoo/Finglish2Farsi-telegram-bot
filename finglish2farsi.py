@@ -4,7 +4,7 @@ from config import TOKEN
 from time import sleep
 from finglish import f2p
 
-def f2f(text) :
+def f2f(text):
     std_text = ''
     for char in text:
         if(not char.isalpha()):
@@ -22,12 +22,19 @@ def f2f(text) :
 def handle(msg):
     content_type, chat_type, chat_id = telepot.glance(msg)
     if chat_type == u'private':
-        if content_type == 'text' :
-            if msg['text'] == '/start' :
-                bot.sendMessage(chat_id, '*WELCOME* 🙂\nI translate Finglish to Farsi', parse_mode='Markdown')
+        if content_type == 'text':
+            if msg['text'] == '/start':
+                bot.sendMessage(chat_id, '*WELCOME* 🙂\nI translate Finglish to Farsi', 'Markdown')
             else:
                 bot.sendMessage(chat_id, f2f(msg['text']))
 
+    elif chat_type in [u'group', u'supergroup']:
+        if content_type == 'text':
+            if msg['text'].lower() == '/f2f':
+                try:
+                    bot.sendMessage(chat_id, f2f(msg['reply_to_message']['text']))
+                except KeyError:
+                    bot.sendMessage(chat_id, '`/f2f` should reply to a message that you want to translate it', 'Markdown')
 
 bot = telepot.Bot(TOKEN)
 MessageLoop(bot, handle).run_as_thread()
