@@ -1,5 +1,6 @@
 import telepot
 from telepot.loop import MessageLoop
+from telepot.namedtuple import InlineQueryResultArticle, InputTextMessageContent
 from config import TOKEN
 from time import sleep
 from finglish import f2p
@@ -36,8 +37,22 @@ def handle(msg):
                 except KeyError:
                     bot.sendMessage(chat_id, '`/f2f` should reply to a message that you want to translate it', 'Markdown')
 
+
+def on_inline_query(msg):
+    query_id, from_id, query_string = telepot.glance(msg, flavor='inline_query')
+    articles = [InlineQueryResultArticle(
+        id='f2f',
+        title='Finglish 2 Farsi',
+        input_message_content=InputTextMessageContent(
+            message_text=f2f(query_string)
+        )
+    )]
+    bot.answerInlineQuery(query_id, articles)
+
+
 bot = telepot.Bot(TOKEN)
-MessageLoop(bot, handle).run_as_thread()
+MessageLoop(bot, {'chat': handle,
+                  'inline_query': on_inline_query}).run_as_thread()
 
 # Keep the program running ...
 while 1:
